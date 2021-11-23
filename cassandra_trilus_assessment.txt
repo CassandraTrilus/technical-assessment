@@ -1,0 +1,248 @@
+// 1.
+// for testing purposes
+const my_amazing_function = function() {
+  console.log('it worked')
+}
+
+let currentPage = location.href
+
+const runOnUpdate = function() {
+  if(currentPage != location.href) {
+    currentPage = location.href;
+    my_amazing_function()
+  }
+}
+
+setInterval(runOnUpdate, 500);
+
+//
+
+const productArray = 
+[ 
+  { 
+  "product_name": "bouncing_bear", 
+  "product_category": "bears", 
+  "product_ID": "bb_112", 
+  "product_price": "3334.23", 
+  "product_quantity": "3", 
+  "product_notes": "This product is obscenely expensive." 
+  }, 
+  { 
+  "product_name": "fluffy_Boots", 
+  "product_category": "shoes", 
+  "product_ID": "fb_223", 
+  "product_price": "124.99", 
+  "product_quantity": "1", 
+  "product_notes": "These boots are never in stock." 
+  }, 
+  { 
+  "product_name": "Happy_baby", 
+  "product_category": "infants", 
+  "product_ID": "hb_11", 
+  "product_price": "500.63", 
+  "product_quantity": "3", 
+  "product_notes": "Trades for unhappy babies prohibited." 
+  } 
+] 
+
+// 2. 
+let selectCategories = productArray.map(product => ({ Name: product.product_name, ID: product.product_ID, Quantity: product.product_quantity}))
+
+console.log(selectCategories)
+
+// 3.
+let orderValue = productArray.reduce((sum, p) => sum + parseFloat(p.product_price), 0)
+
+console.log(orderValue)
+
+// 4.
+let logo = document.getElementsByClassName("lazyloaded")[0]
+
+logo.src = "https://emojis.slackmojis.com/emojis/images/1597320283/10003/catjam.gif?1597320283"
+
+// 5.
+document.body.innerHTML = document.body.innerHTML.replace(/Cook/gi, "ruin")
+
+// 6.
+const displayCategory = function() {
+  if(window.location.pathname.includes('product-category')) {
+    let path = window.location.pathname.split('/').filter((a) => a)
+    console.log(path)
+    let category = path[1]
+    return category
+  }
+}
+displayCategory()
+
+// 7.
+let loginEmail = document.getElementById('username')
+const captureLoginEmail = function() {
+  let loginEmailText = document.getElementById('username').value
+  console.log(loginEmailText)
+  return loginEmailText
+}
+loginEmail.addEventListener('change', captureLoginEmail)
+
+let registerEmail = document.getElementById('reg_email')
+const captureRegisterEmail = function () {
+  let registerEmailText = document.getElementById('reg_email').value
+  console.log(registerEmailText)
+  return registerEmailText
+}
+registerEmail.addEventListener('change', captureRegisterEmail)
+
+let emailForUpdates = document.getElementById('input_1_1')
+const captureUpdatesEmail = function() {
+  let emailForUpdatesText = document.getElementById('input_1_1').value
+  console.log(emailForUpdatesText)
+  return emailForUpdatesText
+}
+emailForUpdates.addEventListener('change', captureUpdatesEmail)
+
+// 8.
+let currentSKU = {sku: 1}
+sessionStorage.setItem('querySKU', JSON.stringify(currentSKU))
+
+const updateSKU = function(){
+  currentSKU = JSON.parse(sessionStorage.getItem('querySKU'))
+  let newSKU = {sku: dataLayer[0].ecommerce.detail.products[0].sku}
+  currentSKU = newSKU
+
+  sessionStorage.setItem("querySKU", JSON.stringify(newSKU))
+  console.log(sessionStorage.getItem("querySKU"))
+}
+const setCookie = function(name, value) {
+  document.cookie = name + "=" + value + "; "
+  let result = document.cookie
+  console.log(result)
+  return result
+}
+
+try {
+  if(window.location.pathname.includes('product')) {
+    window.addEventListener('beforeunload', e => {
+    updateSKU()
+    setCookie('sku', dataLayer[0].ecommerce.detail.products[0].sku)
+    })
+  }
+} catch(err) {
+  console.log('No product details on page')
+}
+
+// 9.
+const findSKU = function() {
+  let arrayObj1 = window.dataLayer.find(o => o.pagePostType === 'product')
+  let productObject = arrayObj1.ecommerce.detail.products.find(o => o.sku != '')
+  let productSKU = productObject.sku
+  console.log(productSKU)
+  return productSKU
+}
+findSKU()
+
+// 10. 
+let cartClone;
+let modalContainer;
+
+function initializeBottomCart() {
+    initializeDropDownCart();
+
+    cartClone = cloneCart();
+
+    setupModal(cartClone);
+
+    // addStyleSheet();
+}
+
+initializeBottomCart();
+
+let canTriggerCart = true;
+let container = document.querySelector("#container");
+window.onscroll = () => {
+    let adjustedScrollDistance = window.pageYOffset + window.innerHeight;
+
+    let bottomOffset = 1000;
+    let bottomTrigger = container.offsetHeight - bottomOffset;
+
+    let pastBottomTrigger = adjustedScrollDistance >= bottomTrigger;
+    if (pastBottomTrigger && canTriggerCart) {
+        showModal();
+        canTriggerCart = false;
+    }
+
+    if(!pastBottomTrigger) {
+        canTriggerCart = true;
+    }
+};
+
+window.onclick = (event) => {
+    hideModalOnBackgroundClick(event);
+}
+
+function initializeDropDownCart() {
+    let miniCartButton = document.querySelector("#tr_phase2_ShoppingBg");
+    // double click mini cart button to render the drop down cart
+    // without this sometimes the drop down cart elements are null
+    miniCartButton.click();
+    miniCartButton.click();
+}
+
+function cloneCart() {
+    let dropDownCart = document.querySelector(".tr_phase2_sub_header");
+    let cartClone = dropDownCart.cloneNode(true);
+    return cartClone;
+}
+
+function setupModal(modalContent) {
+    modalContainer = addModalContainer();
+    modalContainer.appendChild(modalContent);
+    addCloseButton();
+}
+
+function addModalContainer() {
+    let modalContainer = document.createElement("div");
+    modalContainer.className = "bottom-cart-modal";
+    document.body.appendChild(modalContainer);
+    return modalContainer;
+}
+
+function addCloseButton() {
+    let closeButton = document.createElement("span");
+    closeButton.className = "close";
+    closeButton.innerHTML = "&times;";
+    closeButton.onclick = () => {
+        hideModal();
+    }
+    cartClone.prepend(closeButton);
+    return closeButton;
+}
+
+// function addStyleSheet() {
+//     let cartStyleLink = document.createElement("link");
+//     cartStyleLink.rel = "stylesheet";
+//     cartStyleLink.type = "text/css";
+//     cartStyleLink.href = "https://shadopawn.github.io/wunderkind-technical-test/cartStyle.css";
+//     document.head.appendChild(cartStyleLink);
+// }
+
+function hideModalOnBackgroundClick(event) {
+    if (event.target == modalContainer){
+        hideModal();
+    }
+}
+
+function hideModal() {
+    modalContainer.style.display = "none";
+}
+
+function showModal() {
+    modalContainer.style.display = "flex";
+}
+
+
+
+
+
+
+
+
+
